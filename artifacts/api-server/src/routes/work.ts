@@ -2,6 +2,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { Router, type IRouter } from "express";
 import { db, workItemsTable } from "@workspace/db";
 import { requireAdmin } from "../middlewares/adminSession";
+import { releaseStoredMedia } from "../lib/mediaCleanup";
 import {
   CreateWorkItemBody,
   CreateWorkItemResponse,
@@ -77,6 +78,11 @@ router.patch(
       return;
     }
 
+    const [before] = await db
+      .select({ imageUrl: workItemsTable.imageUrl, mediaUrl: workItemsTable.mediaUrl })
+      .from(workItemsTable)
+      .where(eq(workItemsTable.id, params.data.id));
+
     const [item] = await db
       .update(workItemsTable)
       .set(parsed.data)
@@ -88,6 +94,8 @@ router.patch(
       return;
     }
     res.json(UpdateWorkItemResponse.parse(item));
+    // Uploaded media that this change replaced can now be removed from storage.
+    void releaseStoredMedia([before?.imageUrl, before?.mediaUrl], req.log);
   },
 );
 
@@ -104,12 +112,17 @@ router.delete(
     const [item] = await db
       .delete(workItemsTable)
       .where(eq(workItemsTable.id, params.data.id))
-      .returning({ id: workItemsTable.id });
+      .returning({
+        id: workItemsTable.id,
+        imageUrl: workItemsTable.imageUrl,
+        mediaUrl: workItemsTable.mediaUrl,
+      });
     if (!item) {
       res.status(404).json({ error: "Work item not found" });
       return;
     }
     res.sendStatus(204);
+    void releaseStoredMedia([item.imageUrl, item.mediaUrl], req.log);
   },
 );
 

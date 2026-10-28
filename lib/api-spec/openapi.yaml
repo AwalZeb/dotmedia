@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: work
     description: Public portfolio and protected work management
+  - name: storage
+    description: Uploaded media storage and serving
 paths:
   /healthz:
     get:
@@ -483,8 +485,164 @@ paths:
           description: Administrator session required
         "404":
           description: Testimonial not found
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [admin, storage]
+      summary: Request a presigned URL for uploading portfolio media
+      description: |
+        Administrators send JSON metadata about the file (never the file itself)
+        and receive a presigned URL to PUT the bytes directly into App Storage.
+        Only images and videos within the size limits are accepted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Presigned upload URL generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          description: Missing or invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Administrator session required
+        "413":
+          description: File is larger than the allowed size
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "415":
+          description: File type is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Failed to generate upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/public-objects/{filePath}:
+    get:
+      operationId: getPublicObject
+      tags: [storage]
+      summary: Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+      description: |
+        Unconditionally public. Searches PUBLIC_OBJECT_SEARCH_PATHS for the given
+        file path and redirects to a short-lived signed storage URL for the first match.
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Relative file path within the public search paths.
+      responses:
+        "302":
+          description: Redirect to a signed storage URL that serves the file
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Failed to serve public object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/objects/{objectPath}:
+    get:
+      operationId: getStorageObject
+      tags: [storage]
+      summary: Serve uploaded portfolio media
+      description: |
+        Serves media uploaded through the presigned URL flow. Uploaded portfolio
+        media is public website content, so no session is required to view it.
+        Responds with a redirect to a short-lived signed storage URL; storage
+        serves the bytes with the stored Content-Type and native range support.
+      parameters:
+        - name: objectPath
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Object path within the private object dir (for example `uploads/some-uuid`).
+      responses:
+        "302":
+          description: Redirect to a signed storage URL that serves the object
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        "404":
+          description: Object path is not valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Failed to serve object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
 components:
   schemas:
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Original file name.
+        size:
+          type: integer
+          minimum: 1
+          description: File size in bytes.
+        contentType:
+          type: string
+          minLength: 1
+          description: MIME type of the file (for example `image/jpeg` or `video/mp4`).
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+          description: Presigned App Storage URL for the PUT upload.
+        objectPath:
+          type: string
+          description: Normalized object path (for example `/objects/uploads/uuid`). Store this as the media URL.
+        metadata:
+          $ref: "#/components/schemas/UploadUrlRequest"
     HealthStatus:
       type: object
       properties:

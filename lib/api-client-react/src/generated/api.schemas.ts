@@ -5,6 +5,37 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface ErrorEnvelope {
+  error: string;
+}
+
+export interface UploadUrlRequest {
+  /**
+     * Original file name.
+     * @minLength 1
+     * @maxLength 255
+     */
+  name: string;
+  /**
+     * File size in bytes.
+     * @minimum 1
+     */
+  size: number;
+  /**
+     * MIME type of the file (for example `image/jpeg` or `video/mp4`).
+     * @minLength 1
+     */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  /** Presigned App Storage URL for the PUT upload. */
+  uploadURL: string;
+  /** Normalized object path (for example `/objects/uploads/uuid`). Store this as the media URL. */
+  objectPath: string;
+  metadata?: UploadUrlRequest;
+}
+
 export interface HealthStatus {
   status: string;
 }

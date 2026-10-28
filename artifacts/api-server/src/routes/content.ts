@@ -31,6 +31,7 @@ import {
   testimonialsTable,
 } from "@workspace/db";
 import { requireAdmin } from "../middlewares/adminSession";
+import { releaseStoredMedia } from "../lib/mediaCleanup";
 
 const router: IRouter = Router();
 
@@ -76,6 +77,10 @@ router.patch("/admin/clients/:id", requireAdmin, async (req, res): Promise<void>
     res.status(400).json({ error: !params.success ? params.error.message : !parsed.success ? parsed.error.message : "Provide a field to update" });
     return;
   }
+  const [before] = await db
+    .select({ logoUrl: clientsTable.logoUrl })
+    .from(clientsTable)
+    .where(eq(clientsTable.id, params.data.id));
   const [client] = await db
     .update(clientsTable)
     .set(parsed.data)
@@ -86,6 +91,7 @@ router.patch("/admin/clients/:id", requireAdmin, async (req, res): Promise<void>
     return;
   }
   res.json(UpdateClientResponse.parse(client));
+  void releaseStoredMedia([before?.logoUrl], req.log);
 });
 
 router.delete("/admin/clients/:id", requireAdmin, async (req, res): Promise<void> => {
@@ -97,12 +103,13 @@ router.delete("/admin/clients/:id", requireAdmin, async (req, res): Promise<void
   const [client] = await db
     .delete(clientsTable)
     .where(eq(clientsTable.id, params.data.id))
-    .returning({ id: clientsTable.id });
+    .returning({ id: clientsTable.id, logoUrl: clientsTable.logoUrl });
   if (!client) {
     res.status(404).json({ error: "Client not found" });
     return;
   }
   res.status(204).json(DeleteClientResponse.parse(undefined));
+  void releaseStoredMedia([client.logoUrl], req.log);
 });
 
 router.get("/case-study/healthcare", async (_req, res): Promise<void> => {
@@ -174,6 +181,10 @@ router.patch("/admin/testimonials/:id", requireAdmin, async (req, res): Promise<
     res.status(400).json({ error: !params.success ? params.error.message : !parsed.success ? parsed.error.message : "Provide a field to update" });
     return;
   }
+  const [before] = await db
+    .select({ imageUrl: testimonialsTable.imageUrl })
+    .from(testimonialsTable)
+    .where(eq(testimonialsTable.id, params.data.id));
   const [testimonial] = await db
     .update(testimonialsTable)
     .set(parsed.data)
@@ -184,6 +195,7 @@ router.patch("/admin/testimonials/:id", requireAdmin, async (req, res): Promise<
     return;
   }
   res.json(UpdateTestimonialResponse.parse(testimonial));
+  void releaseStoredMedia([before?.imageUrl], req.log);
 });
 
 router.delete("/admin/testimonials/:id", requireAdmin, async (req, res): Promise<void> => {
@@ -195,12 +207,13 @@ router.delete("/admin/testimonials/:id", requireAdmin, async (req, res): Promise
   const [testimonial] = await db
     .delete(testimonialsTable)
     .where(eq(testimonialsTable.id, params.data.id))
-    .returning({ id: testimonialsTable.id });
+    .returning({ id: testimonialsTable.id, imageUrl: testimonialsTable.imageUrl });
   if (!testimonial) {
     res.status(404).json({ error: "Testimonial not found" });
     return;
   }
   res.status(204).json(DeleteTestimonialResponse.parse(undefined));
+  void releaseStoredMedia([testimonial.imageUrl], req.log);
 });
 
 export default router;

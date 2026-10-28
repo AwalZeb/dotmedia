@@ -4,6 +4,7 @@ import adminAuthRouter from "./admin-auth";
 import enquiriesRouter from "./enquiries";
 import contentRouter from "./content";
 import workRouter from "./work";
+import storageRouter from "./storage";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(adminAuthRouter);
 router.use(enquiriesRouter);
 router.use(contentRouter);
 router.use(workRouter);
+router.use(storageRouter);
 
 export default router;

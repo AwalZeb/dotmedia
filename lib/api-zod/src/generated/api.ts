@@ -485,3 +485,64 @@ export const DeleteTestimonialParams = zod.object({
 export const DeleteTestimonialResponse = zod.void()
 
 
+/**
+ * Administrators send JSON metadata about the file (never the file itself)
+ * and receive a presigned URL to PUT the bytes directly into App Storage.
+ * Only images and videos within the size limits are accepted.
+ * @summary Request a presigned URL for uploading portfolio media
+ */
+export const requestUploadUrlBodyNameMax = 255;
+
+
+
+
+
+export const RequestUploadUrlBody = zod.object({
+  "name": zod.string().min(1).max(requestUploadUrlBodyNameMax).describe('Original file name.'),
+  "size": zod.number().int().min(1).describe('File size in bytes.'),
+  "contentType": zod.string().min(1).describe('MIME type of the file (for example `image/jpeg` or `video/mp4`).')
+})
+
+export const requestUploadUrlResponseMetadataNameMax = 255;
+
+
+
+
+
+export const RequestUploadUrlResponse = zod.object({
+  "uploadURL": zod.string().url().describe('Presigned App Storage URL for the PUT upload.'),
+  "objectPath": zod.string().describe('Normalized object path (for example `/objects/uploads/uuid`). Store this as the media URL.'),
+  "metadata": zod.object({
+  "name": zod.string().min(1).max(requestUploadUrlResponseMetadataNameMax).describe('Original file name.'),
+  "size": zod.number().int().min(1).describe('File size in bytes.'),
+  "contentType": zod.string().min(1).describe('MIME type of the file (for example `image/jpeg` or `video/mp4`).')
+}).optional()
+})
+
+
+/**
+ * Unconditionally public. Searches PUBLIC_OBJECT_SEARCH_PATHS for the given
+ * file path and redirects to a short-lived signed storage URL for the first match.
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+export const GetPublicObjectParams = zod.object({
+  "filePath": zod.coerce.string().describe('Relative file path within the public search paths.')
+})
+
+export const GetPublicObjectResponse = zod.void()
+
+
+/**
+ * Serves media uploaded through the presigned URL flow. Uploaded portfolio
+ * media is public website content, so no session is required to view it.
+ * Responds with a redirect to a short-lived signed storage URL; storage
+ * serves the bytes with the stored Content-Type and native range support.
+ * @summary Serve uploaded portfolio media
+ */
+export const GetStorageObjectParams = zod.object({
+  "objectPath": zod.coerce.string().describe('Object path within the private object dir (for example `uploads/some-uuid`).')
+})
+
+export const GetStorageObjectResponse = zod.void()
+
+

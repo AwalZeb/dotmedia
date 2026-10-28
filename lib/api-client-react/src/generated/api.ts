@@ -34,6 +34,7 @@ import type {
   EnquiryCreatedResponse,
   EnquiryInput,
   EnquiryUpdate,
+  ErrorEnvelope,
   HealthStatus,
   HealthcareCaseStudy,
   HealthcareCaseStudyInput,
@@ -42,6 +43,8 @@ import type {
   TestimonialInput,
   TestimonialUpdate,
   UpdateAdminEnquiryParams,
+  UploadUrlRequest,
+  UploadUrlResponse,
   WorkItem,
   WorkItemInput,
   WorkItemUpdate
@@ -2379,4 +2382,303 @@ export const useDeleteTestimonial = <TError = ErrorType<void>,
       > => {
       return useMutation(getDeleteTestimonialMutationOptions(options), queryClient);
     }
+
+export const getRequestUploadUrlUrl = () => {
+
+
+
+
+  return `/api/storage/uploads/request-url`
+}
+
+/**
+ * Administrators send JSON metadata about the file (never the file itself)
+ * and receive a presigned URL to PUT the bytes directly into App Storage.
+ * Only images and videos within the size limits are accepted.
+ * @summary Request a presigned URL for uploading portfolio media
+ */
+export const requestUploadUrl = async (uploadUrlRequest: UploadUrlRequest, options?: Parameters<typeof customFetch>[1]): Promise<UploadUrlResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<UploadUrlResponse>(getRequestUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(uploadUrlRequest)
+  }
+);}
+
+
+
+
+
+export const getRequestUploadUrlMutationKey = () => ['requestUploadUrl'] as const;
+
+export const getRequestUploadUrlMutationOptions = <TError = ErrorType<ErrorEnvelope | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestUploadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestUploadUrl>>, RequestUploadUrlMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestUploadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestUploadUrl>>>
+    export type RequestUploadUrlMutationBody = BodyType<UploadUrlRequest>
+    export type RequestUploadUrlMutationError = ErrorType<ErrorEnvelope | void>
+    export type RequestUploadUrlMutationVariables = {data: BodyType<UploadUrlRequest>}
+
+    /**
+ * @summary Request a presigned URL for uploading portfolio media
+ */
+export const useRequestUploadUrl = <TError = ErrorType<ErrorEnvelope | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof requestUploadUrl>>,
+        TError,
+        RequestUploadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestUploadUrlMutationOptions(options), queryClient);
+    }
+
+export const getGetPublicObjectUrl = (filePath: string,) => {
+
+
+
+
+  return `/api/storage/public-objects/${filePath}`
+}
+
+/**
+ * Unconditionally public. Searches PUBLIC_OBJECT_SEARCH_PATHS for the given
+ * file path and redirects to a short-lived signed storage URL for the first match.
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+export const getPublicObject = async (filePath: string, options?: Parameters<typeof customFetch>[1]): Promise<unknown> => {
+
+  return customFetch<unknown>(getGetPublicObjectUrl(filePath),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicObjectQueryKey = (filePath: string,) => {
+    return [
+    `/api/storage/public-objects/${filePath}`
+    ] as const;
+    }
+
+
+export const getGetPublicObjectQueryOptions = <TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<void | ErrorEnvelope>>(filePath: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicObjectQueryKey(filePath);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicObject>>> = ({ signal }) => getPublicObject(filePath, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: filePath !== null && filePath !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPublicObjectQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicObject>>>
+export type GetPublicObjectQueryError = ErrorType<void | ErrorEnvelope>
+
+
+export function useGetPublicObject<TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<void | ErrorEnvelope>>(
+ filePath: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicObject>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicObject>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicObject<TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<void | ErrorEnvelope>>(
+ filePath: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicObject>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicObject>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicObject<TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<void | ErrorEnvelope>>(
+ filePath: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+
+export function useGetPublicObject<TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<void | ErrorEnvelope>>(
+ filePath: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPublicObjectQueryOptions(filePath,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStorageObjectUrl = (objectPath: string,) => {
+
+
+
+
+  return `/api/storage/objects/${objectPath}`
+}
+
+/**
+ * Serves media uploaded through the presigned URL flow. Uploaded portfolio
+ * media is public website content, so no session is required to view it.
+ * Responds with a redirect to a short-lived signed storage URL; storage
+ * serves the bytes with the stored Content-Type and native range support.
+ * @summary Serve uploaded portfolio media
+ */
+export const getStorageObject = async (objectPath: string, options?: Parameters<typeof customFetch>[1]): Promise<unknown> => {
+
+  return customFetch<unknown>(getGetStorageObjectUrl(objectPath),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStorageObjectQueryKey = (objectPath: string,) => {
+    return [
+    `/api/storage/objects/${objectPath}`
+    ] as const;
+    }
+
+
+export const getGetStorageObjectQueryOptions = <TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<void | ErrorEnvelope>>(objectPath: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStorageObjectQueryKey(objectPath);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStorageObject>>> = ({ signal }) => getStorageObject(objectPath, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: objectPath !== null && objectPath !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStorageObjectQueryResult = NonNullable<Awaited<ReturnType<typeof getStorageObject>>>
+export type GetStorageObjectQueryError = ErrorType<void | ErrorEnvelope>
+
+
+export function useGetStorageObject<TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<void | ErrorEnvelope>>(
+ objectPath: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStorageObject>>,
+          TError,
+          Awaited<ReturnType<typeof getStorageObject>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStorageObject<TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<void | ErrorEnvelope>>(
+ objectPath: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStorageObject>>,
+          TError,
+          Awaited<ReturnType<typeof getStorageObject>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStorageObject<TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<void | ErrorEnvelope>>(
+ objectPath: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Serve uploaded portfolio media
+ */
+
+export function useGetStorageObject<TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<void | ErrorEnvelope>>(
+ objectPath: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStorageObjectQueryOptions(objectPath,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
