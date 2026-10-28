@@ -1,5 +1,9 @@
 // Export your models here. Add one export per file
-// export * from "./posts";
+export * from "./work-items";
+export * from "./enquiries";
+export * from "./clients";
+export * from "./testimonials";
+export * from "./healthcare-case-study";
 //
 // Each model/table should ideally be split into different files.
 // Each model/table should define a Drizzle table, insert schema, and types:

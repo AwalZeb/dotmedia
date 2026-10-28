@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Dot Media"
+description = "A premium digital agency website for Dot Media in Peshawar, featuring services, healthcare marketing, portfolio, about, and contact pages."
+version = "1.0.0"
+id = "artifacts/dot-media"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19766
+
+[services.development]
+run = "pnpm --filter @workspace/dot-media run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/dot-media", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/dot-media/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19766"
+BASE_PATH = "/"

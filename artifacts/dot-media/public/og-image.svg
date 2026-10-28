@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="80%" cy="36%" r="70%">
+      <stop offset="0" stop-color="#4b1014"/>
+      <stop offset="1" stop-color="#0a0a0a"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <circle cx="986" cy="162" r="10" fill="#e10e1a"/>
+  <path d="M0 510H1200" stroke="#292929"/>
+  <text x="94" y="256" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="80" font-weight="700" letter-spacing="-5">Dot Media<tspan fill="#e10e1a">.</tspan></text>
+  <text x="100" y="330" fill="#bdbdbd" font-family="Arial,Helvetica,sans-serif" font-size="26">Digital growth partner in Peshawar</text>
+  <text x="100" y="562" fill="#888" font-family="Arial,Helvetica,sans-serif" font-size="17" letter-spacing="4">STRATEGY  ·  CONTENT  ·  CREATIVE</text>
+</svg>
