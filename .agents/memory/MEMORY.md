@@ -1,0 +1,1 @@
+- [Brand logo asset handling](brand-logo-asset.md) — logo source is an opaque dark PNG with red glow; served as a crop + CSS radial mask, never background-removed; derive favicon/OG from the source.

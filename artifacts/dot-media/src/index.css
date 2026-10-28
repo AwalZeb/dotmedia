@@ -125,6 +125,11 @@
 .btn-outline { color: white; border: 1px solid #505050; background: rgba(255,255,255,.015); }
 .btn-outline:hover { border-color: #a7a7a7; }
 .header-consultation { display: none; }
+.brand-mark {
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 84%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side, #000 84%, transparent 100%);
+  -webkit-user-drag: none;
+}
 .focus-ring:focus-visible { outline: 2px solid #ff5961; outline-offset: 4px; }
 .work-art { background: radial-gradient(ellipse at 70% 20%, rgba(225,14,26,.36), transparent 37%), linear-gradient(135deg, #252323, #111 66%); }
 .field { width: 100%; border: 1px solid #303030; border-radius: 8px; background: #141414; color: white; padding: 14px 15px; outline: none; transition: border-color .2s ease; }

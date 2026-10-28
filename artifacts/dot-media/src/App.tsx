@@ -36,6 +36,7 @@ import './index.css';
 
 const queryClient = new QueryClient();
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+const logoUrl = `${basePath}/logo.png`;
 
 const nav = site.navigation;
 
@@ -95,7 +96,7 @@ function Meta() {
           '@type': 'Organization',
           name: site.name,
           url: `${window.location.origin}${basePath}/`,
-          logo: `${window.location.origin}${basePath}/logo.svg`,
+          logo: `${window.location.origin}${logoUrl}`,
           email: site.email,
           telephone: `+${site.phoneInternational}`,
           sameAs: [site.instagramUrl],
@@ -125,11 +126,14 @@ function Meta() {
   return null;
 }
 
-function Brand({ small = false }: { small?: boolean }) {
+function Brand() {
   return (
-    <Link href="/" className={`brand focus-ring inline-flex flex-col ${small ? 'gap-0' : 'gap-1'}`} aria-label={`${site.name} home`}>
-      <span className={`font-display font-bold tracking-[-.06em] text-white ${small ? 'text-[18px]' : 'text-[21px]'}`}>{site.name}<span className="red-dot">.</span></span>
-      {!small && <span className="text-[9px] tracking-[.09em] text-[#8d8d8d]">{site.tagline}</span>}
+    <Link href="/" className="brand focus-ring inline-flex items-center gap-2 rounded-lg" aria-label={`${site.name} home`} data-testid="link-brand-home">
+      <img src={logoUrl} alt="" width="320" height="320" decoding="async" className="brand-mark -ml-2 h-14 w-14 shrink-0 select-none" data-testid="img-brand-logo" />
+      <span className="flex flex-col gap-1">
+        <span className="font-display text-[21px] font-bold tracking-[-.06em] text-white">{site.name}<span className="red-dot">.</span></span>
+        <span className="text-[9px] tracking-[.09em] text-[#8d8d8d]">{site.tagline}</span>
+      </span>
     </Link>
   );
 }
